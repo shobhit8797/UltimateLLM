@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> LLM Policy Decoding Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar {
+            width: 350px;
+            background-color: #1a1a1a;
+            padding: 1.5rem;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+            height: 100%;
+            color: #fff;
+        }
+        .sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        #document-preview {
+            max-height: 50vh;
+            overflow-y: auto;
+            background-color: #2d2d2d;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        #document-preview pre,
+        #document-preview img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+        #document-preview pre {
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            padding: 0.5rem;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #2d2d2d;
+            color: #fff;
+        }
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #4c51bf;
+            color: #fff;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #2d2d2d;
+            color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            align-self: flex-start;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #fff;
+            border-top: 3px solid #4c51bf;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .upload-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .upload-section h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .file-input {
+            margin-bottom: 20px;
+        }
+        .file-input input[type="file"] {
+            display: none;
+        }
+        .file-input label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .file-input label:hover {
+            background-color: #0056b3;
+        }
+        .process-button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .process-button:hover {
+            background-color: #218838;
+        }
+        .message-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .send-button {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .send-button:hover {
+            background-color: #c82333;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="w-full flex flex-col bg-gray-900 h-screen">
+    <div class="flex flex-row flex-grow w-full">
+    <div
+        class="flex flex-col items-center justify-between p-4 border-r"
+    >
+        <form class="p-4 space-y-2" method="post" action="{% url 'process_files' %}" enctype="multipart/form-data" id="process-files-form">
+            <input type="file" class="hidden" id="fileInput" name="insurance_policy" />
+            <label for="fileInput" class="text-center">
+                <div id="upload-container" class="p-6 border-2 border-dashed border-green-500 rounded-xl flex flex-col items-center justify-center cursor-pointer w-80 h-64 bg-gray-700 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10 text-green-500 mx-auto" id='upload-icon'>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" x2="12" y1="3" y2="15" />
+                    </svg>
+                    <p class="text-green-600 font-semibold" id="upload-text">Click to Upload</p>
+                </div>
+            </label>
+        </form>
+    </div>
+    <div class="flex flex-col flex-grow">
+        <!-- Main Content -->
+        <main class="flex-grow bg-gray-800 rounded-lg shadow-lg m-5 overflow-hidden flex flex-col h-full">
+            <div class="bg-gray-700 text-white p-4 flex justify-between items-center">
+                <div class="flex flex-col items-center">
+                    <img src="https://carefi.in/public/carefi-1.svg" alt="Carefi Logo" class="h-12 mr-2">
+                    <p class="text-white text-sm mt-2">Your Policy, Decoded</p>
+                </div>
+                <h1 class="text-xl font-semibold ml-auto">ClaimXpert AI - Your Policy, Decoded</h1>
+                {% if policy_checksum %}
+                <form method="post" action="{% url 'clear_chat' policy_checksum=policy_checksum %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 text-sm ml-2">
+                        Clear Chat
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            
+            
+            <div id="chat-box" class="p-4 space-y-2 flex-grow overflow-y-auto flex flex-col">
+                {% if policy_checksum %}
+                {% for policy, message_list in messages.items %}
+                {% if policy == policy_checksum %}
+                {% for message in message_list %}
+                <div class="message {% if message.sender == 'user' %}user-message{% else %}bot-message{% endif %}">
+                    {{ message.text }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div id="notification" class="hidden text-sm text-red-400 mb-4"></div>
+
+            <!-- Broader Send Message Section -->
+            <form class="p-4 border-t border-gray-700 flex items-center space-x-2" method="post" action="{% if policy_checksum %}{% url 'send_message' policy_checksum=policy_checksum %}{% else %}# {% endif %}" id="send-message-form">
+                {% csrf_token %}
+                <textarea name="message" rows="3" placeholder="Type your message..." class="flex-grow p-2 border border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none bg-gray-700 text-white" id="message-input"></textarea>
+                <button type="submit" class="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" id="send-button">
+                    Send
+                </button>
+            </form>
+        </main>
+    </div>
+    </div>
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const uploadContainer = document.getElementById("upload-container");
+        const uploadText = document.getElementById("upload-text");
+        const processFilesForm = document.getElementById("process-files-form");
+        const uploadIcon = document.getElementById("upload-icon");
+
+
+        fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                uploadText.innerHTML = `Processing: ${file.name} <span class="loading"></span>`;
+                uploadContainer.classList.add("cursor-not-allowed");
+                processFilesForm.submit(); // Automatically submit the form
+                uploadIcon.classList.add("hidden");
+            }
+        });
+
+        // WebSocket functionality for chat
+        const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/");
+        const chatBox = document.getElementById("chat-box");
+        const sendMessageForm = document.getElementById("send-message-form");
+        const sendButton = document.getElementById("send-button");
+        const messageInput = document.getElementById("message-input");
+
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${data.sender === "user" ? "user-message" : "bot-message"}`;
+            messageDiv.textContent = data.text;
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        };
+
+        chatSocket.onclose = function () {
+            console.error("Chat socket closed unexpectedly");
+        };
+
+        sendMessageForm.addEventListener("submit", (event) => {
+            if (!messageInput.value.trim()) {
+                event.preventDefault();
+                notification.textContent = "Message cannot be empty.";
+                notification.classList.remove("hidden");
+            } else {
+                notification.classList.add("hidden");
+                sendButton.disabled = true;
+                sendButton.innerHTML = 'Sending... <span class="loading"></span>';
+            }
+        });
+
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function displayWelcomeMessage() {
+            if (chatBox.children.length === 0) {
+                const welcomeMessageDiv = document.createElement("div");
+                welcomeMessageDiv.className = "message bot-message welcome-popup";
+                welcomeMessageDiv.textContent = "Welcome to CareFi, How can we assist you today?";
+                chatBox.appendChild(welcomeMessageDiv);
+                setTimeout(() => welcomeMessageDiv.remove(), 3000);
+                scrollToBottom();
+            }
+        }
+
+        displayWelcomeMessage();
+</script>
+
+</body>
+</html>

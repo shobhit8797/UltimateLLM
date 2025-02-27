@@ -1,0 +1,40 @@
+# Use the official Python 3.12 slim image
+FROM python:3.12-slim
+
+# Set environment variables for consistent Python behavior
+ENV LANG=C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install system dependencies and clean up apt cache
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    poppler-utils \
+    tesseract-ocr \
+    python3-tk \
+    libgl1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /app
+
+# Upgrade pip for the latest features and fixes
+RUN pip install --upgrade pip
+
+# Copy the requirements file first to leverage Docker cache
+COPY ultimate_llm/requirements.txt ./requirements.txt
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Uncomment if needed
+# RUN pip install --no-cache-dir pytesseract opencv-python-headless
+
+# Copy the rest of the application code into the container
+COPY . .
+
+# Expose the port that Gunicorn will bind to
+EXPOSE 8000
+
+# Run collectstatic, apply migrations, and start Gunicorn.
+CMD ["bash", "-c", "python manage.py collectstatic --no-input && python manage.py migrate --fake-initial && gunicorn config.wsgi:application -b 0.0.0.0:8000 --limit-request-line 8190000 --limit-request-fields 32768 --limit-request-field_size 8190000 --timeout 600"]

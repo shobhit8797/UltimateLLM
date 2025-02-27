@@ -1,0 +1,37 @@
+services:
+    db:
+        image: postgres:15
+        container_name: postgres_db
+        restart: always
+        environment:
+            - POSTGRES_DB=lexobot_db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+    web:
+        build: .
+        container_name: policy_decoder
+        command: >
+            bash -c "python manage.py wait_for_db &&
+                     python manage.py migrate --fake-initial &&
+                     python manage.py collectstatic --no-input &&
+                     python manage.py runserver 0.0.0.0:8000"
+        volumes:
+            - .:/app
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
+        environment:
+            - POSTGRES_DB=lexobot_db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - SECRET_KEY=django-insecure-lesp92&rm$8fgki(u=y6zsz-pw692j0elyc)klq-ih1(8o81i6 # Replace with a secure key
+            - DEBUG=1 # Set to 0 for production
+
+volumes:
+    postgres_data:
