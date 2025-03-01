@@ -28,14 +28,18 @@ export function SignupForm({
         event.preventDefault();
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/signup/`, {
+            const response = await fetch(`${BASE_URL}/api/auth/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Allow-Control-Allow-Origin": "*",
                     "Sec-fetch-site": "same-origin",
                 },
-                body: JSON.stringify({ email, password, first_name, last_name }),
+                body: JSON.stringify({
+                    email,
+                    password,
+                    first_name,
+                    last_name,
+                }),
             });
 
             if (!response.ok) {
@@ -118,7 +122,7 @@ export function SignupForm({
                                     />
                                 </div>
                                 <Button type="submit" className="w-full">
-                                    Login
+                                    Sign Up
                                 </Button>
                             </div>
                             <div className="text-center text-sm">

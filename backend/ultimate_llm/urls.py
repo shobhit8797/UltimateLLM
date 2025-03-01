@@ -25,6 +25,7 @@ admin.autodiscover()
 urlpatterns: list = [
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
     path("admin/", admin.site.urls),
+    path("api/auth/", include("users.urls")),
     path("api/parser/", include("document_parser.urls")),
     path("llm_chat/", include("llm_chat.urls")),
 ]
