@@ -22,7 +22,12 @@ function ChatWindow({ conversationId }) {
     const fetchMessages = async () => {
         try {
             const response = await axios.get(
-                `${API_BASE_URL}conversations/${conversationId}/`
+                `${API_BASE_URL}api/chat/conversations/${conversationId}`,
+                {
+                    headers: {
+                        Authorization: "Bearer hDDm5qJg2VSviWnziBZa8a8hDFXKBW",
+                    },
+                }
             );
             setMessages(response.data.messages);
         } catch (error) {
@@ -46,12 +51,12 @@ function ChatWindow({ conversationId }) {
 
         try {
             const response = await fetch(
-                `${API_BASE_URL}conversations/${conversationId}/send_message/`,
+                `${API_BASE_URL}api/chat/conversations/${conversationId}/send_message`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Token ${TOKEN}`,
+                        Authorization: "Bearer hDDm5qJg2VSviWnziBZa8a8hDFXKBW",
                     },
                     body: JSON.stringify({ text: messageText }),
                 }

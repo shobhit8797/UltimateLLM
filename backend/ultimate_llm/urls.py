@@ -27,5 +27,5 @@ urlpatterns: list = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("users.urls")),
     path("api/parser/", include("document_parser.urls")),
-    path("llm_chat/", include("llm_chat.urls")),
+    path("api/chat/", include("llm_chat.urls")),
 ]

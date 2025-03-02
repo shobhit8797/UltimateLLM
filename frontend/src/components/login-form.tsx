@@ -19,21 +19,26 @@ export function LoginForm({
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const BASE_URL = import.meta.env.VITE_BASE_URL; // Fetch API URL from .env
-    console.log("BASE_URL:", BASE_URL);
+    const BASE_URL = import.meta.env.VITE_BASE_URL;
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
         try {
-            const response = await fetch(`${BASE_URL}/auth/login/`, {
+            const response = await fetch(`${BASE_URL}/o/token/`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "Allow-Control-Allow-Origin": "*",
+                    "Content-Type": "application/x-www-form-urlencoded",
                     "Sec-fetch-site": "same-origin",
                 },
-                body: JSON.stringify({ email, password }),
+                body: new URLSearchParams({
+                    grant_type: "password",
+                    username: email,
+                    password: password,
+                    client_id: "10dkrsTt5NKwoFsxw6UoqgTsj4693S2lfW7bkSqU",
+                    client_secret:
+                        "tsOxiH7SsvYYlQSLj5gbwMcuFbmniIBmNhbTJ4qP2lG26jfE0S8voIsGFObYbqZsrzvvBlD4zZDHuZSBc1wR4OI318legZAAvyYb86wCrillyZf9oTjjdTq11dpvtedJ",
+                }),
             });
 
             if (!response.ok) {

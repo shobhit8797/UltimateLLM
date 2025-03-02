@@ -167,4 +167,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # ======== ENVIROMENT VARIABLES ========
-# OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+APPEND_SLASH=False

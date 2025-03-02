@@ -1,18 +1,17 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from .serializers import UserRegistrationSerializer
+from .serializers import SignupSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from oauth2_provider.models import get_application_model
-from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import TokenView
 from rest_framework import status
 
 class SignupView(generics.CreateAPIView):
-    serializer_class = UserRegistrationSerializer
-    permission_classes = [AllowAny]  # Allow anyone to register
+    serializer_class = SignupSerializer
+    permission_classes = [AllowAny]
 
 
 class SigninView(APIView):
@@ -20,7 +19,7 @@ class SigninView(APIView):
 
     def post(self, request):
         # Validate credentials
-        username = request.data.get("username")
+        username = request.data.get("email")
         password = request.data.get("password")
         user = authenticate(username=username, password=password)
 
@@ -46,13 +45,21 @@ class SigninView(APIView):
             "grant_type": "password",
             "username": username,
             "password": password,
-            "client_id": app.client_id,
-            "client_secret": "mysecret123",  # Replace with your actual client_secret
+            "client_id": "10dkrsTt5NKwoFsxw6UoqgTsj4693S2lfW7bkSqU",
+            "client_secret": "tsOxiH7SsvYYlQSLj5gbwMcuFbmniIBmNhbTJ4qP2lG26jfE0S8voIsGFObYbqZsrzvvBlD4zZDHuZSBc1wR4OI318legZAAvyYb86wCrillyZf9oTjjdTq11dpvtedJ",
         }
-        token_view = TokenView.as_view()
-        token_response = token_view(
-            request._request.__class__(method="POST", body=token_request_data)
+
+        request.build_absolute_uri
+        factory = RequestFactory()
+        token_request = factory.post(
+            "/oauth/token/",  # The endpoint doesn't matter here; TokenView will process the data
+            data=token_request_data,
+            content_type="application/x-www-form-urlencoded"
         )
+
+        # Call the TokenView with the simulated request
+        token_view = TokenView.as_view()
+        token_response = token_view(token_request)
 
         if token_response.status_code == 200:
             return Response(token_response.data)
