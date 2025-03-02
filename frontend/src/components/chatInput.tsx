@@ -41,9 +41,9 @@ export default function ChatInput({
                 try {
                     while (true) {
                         const { value, done } = await reader.read();
-                        if (done) break;
-                        console.log("Received: ", value);
                         const data = JSON.parse(value);
+                        if (done || data.text === "DONE") break;
+                        console.log("Received: ", value);
                         if ("conversation_id" in data) {
                             console.log(
                                 "conversation_id:",

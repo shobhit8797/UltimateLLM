@@ -1,13 +1,13 @@
-from rest_framework import generics
-from rest_framework.permissions import AllowAny
-from .serializers import SignupSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate
 from oauth2_provider.models import get_application_model
 from oauth2_provider.views import TokenView
-from rest_framework import status
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import SignupSerializer
+
 
 class SignupView(generics.CreateAPIView):
     serializer_class = SignupSerializer
@@ -54,7 +54,7 @@ class SigninView(APIView):
         token_request = factory.post(
             "/oauth/token/",  # The endpoint doesn't matter here; TokenView will process the data
             data=token_request_data,
-            content_type="application/x-www-form-urlencoded"
+            content_type="application/x-www-form-urlencoded",
         )
 
         # Call the TokenView with the simulated request
