@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from ultimate_llm.utilities.resources import GlobalResources
 
-from .models import Conversation, Message
+from .models import Conversation, Message, Sender
 from .serializers import (
     ConversationDetailSerializer,
     ConversationListSerializer,
@@ -54,7 +54,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
         # Create user message
         user_message = Message.objects.create(
-            conversation=conversation, text=user_message_text, is_user=True
+            conversation=conversation, text=user_message_text, sender=Sender.USER
         )
         user_message_data = MessageSerializer(user_message).data
 
@@ -66,7 +66,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             try:
                 yield json.dumps(
                     {
-                        "conversation_id": conversation.id,
+                        "conversation_id": str(conversation.id),
                         "user_message": user_message_data,
                     }
                 ) + "\n"
@@ -88,7 +88,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 _ = Message.objects.create(
                     conversation=conversation,
                     text=full_response.strip(),
-                    is_user=False,
+                    sender=Sender.ASSISTANT,
                 )
                 yield json.dumps({"text": "DONE"}) + "\n"
 

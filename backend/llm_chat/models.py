@@ -4,11 +4,10 @@ from enum import Enum
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-
 from users.models import User
 
 
-class Role(models.TextChoices):
+class Sender(models.TextChoices):
     ASSISTANT = "A", _("Assistant")
     SYSTEM = "S", _("System")
     USER = "U", _("User")
@@ -30,11 +29,13 @@ class Message(models.Model):
         "Conversation", on_delete=models.CASCADE, related_name="messages"
     )
     text = models.TextField()
-    role = models.CharField(max_length=1, choices=Role.choices)
+    sender = models.CharField(max_length=1, choices=Sender.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     meta_data = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
-        role_name = dict(Role.choices).get(self.role, "Unknown")
-        truncated_text = (self.text[:50] + "...") if len(self.text) > 50 else self.text
-        return f"{role_name}: {truncated_text}"
+        sender_name = dict(Sender.choices).get(self.sender, "Unknown")
+        truncated_text = (
+            sender_name(self.text[:50] + "...") if len(self.text) > 50 else self.text
+        )
+        return f"{sender_name}: {truncated_text}"
