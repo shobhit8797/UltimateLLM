@@ -35,9 +35,9 @@ export function LoginForm({
                     grant_type: "password",
                     username: email,
                     password: password,
-                    client_id: "10dkrsTt5NKwoFsxw6UoqgTsj4693S2lfW7bkSqU",
+                    client_id: "g1LyMvOsnaiOlDIekxiR8jQALPVUIxJUhycYJ8ur",
                     client_secret:
-                        "tsOxiH7SsvYYlQSLj5gbwMcuFbmniIBmNhbTJ4qP2lG26jfE0S8voIsGFObYbqZsrzvvBlD4zZDHuZSBc1wR4OI318legZAAvyYb86wCrillyZf9oTjjdTq11dpvtedJ",
+                        "m3r2VFgMjAdj2ABBZvDb8vx6w8t8kTCt81BUDitQxl5Nguljw9r5DYxz5KfjFD3t3chr7Tj1JDSmWDvmYYzMFmNs88PW113QQUEzraOG33WOA4J6vsGwmoAdpWySTjvP",
                 }),
             });
 
@@ -46,7 +46,7 @@ export function LoginForm({
             }
 
             const data = await response.json();
-            console.log("Login Response:", data);
+            localStorage.setItem("token", data.access_token);
         } catch (error) {
             console.error("Error logging in:", error);
         }

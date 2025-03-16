@@ -1,15 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Button } from "./ui/Button";
 import { Textarea } from "./ui/Textarea";
+import { log } from "console";
 
 const API_BASE_URL = "http://localhost:8000/";
-const TOKEN = "your-auth-token-here";
 
-function ChatWindow({ conversationId }) {
+export default function ChatWindow({
+    conversationId,
+}: {
+    conversationId?: string;
+}) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
+
+    log(conversationId);
 
     useEffect(() => {
         if (conversationId) {
@@ -25,7 +31,9 @@ function ChatWindow({ conversationId }) {
                 `${API_BASE_URL}api/chat/conversations/${conversationId}`,
                 {
                     headers: {
-                        Authorization: "Bearer hDDm5qJg2VSviWnziBZa8a8hDFXKBW",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
                     },
                 }
             );
@@ -56,7 +64,9 @@ function ChatWindow({ conversationId }) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: "Bearer hDDm5qJg2VSviWnziBZa8a8hDFXKBW",
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "token"
+                        )}`,
                     },
                     body: JSON.stringify({ text: messageText }),
                 }
@@ -80,12 +90,12 @@ function ChatWindow({ conversationId }) {
                     } else if (data.assistant_chunk) {
                         assistantResponse += data.assistant_chunk;
                         setMessages((prev) => {
-                            const updated = [...prev.filter((m) => m.is_user)];
+                            const updated = [...prev.filter((m) => m.role)];
                             return [
                                 ...updated,
                                 {
                                     text: assistantResponse,
-                                    is_user: false,
+                                    // role: false,
                                     created_at: new Date().toISOString(),
                                 },
                             ];
@@ -109,35 +119,36 @@ function ChatWindow({ conversationId }) {
 
     return (
         <div className="flex-1 flex flex-col bg-gray-900">
-            <div className="flex-1 p-6 overflow-y-auto">
-                {messages.map((msg, index) => (
-                    <div
-                        key={index}
-                        className={`max-w-[70%] p-4 mb-4 rounded-lg ${
-                            msg.is_user
-                                ? "ml-auto bg-blue-600 text-white"
-                                : "mr-auto bg-gray-700 text-gray-100"
-                        }`}
-                    >
-                        {msg.text}
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
-            <div className="p-6 border-t border-gray-700 bg-gray-800">
-                <div className="flex gap-4">
-                    <Textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Type your message..."
-                        className="flex-1"
-                    />
-                    <Button onClick={sendMessage}>Send</Button>
+            {conversationId ? (
+                <div className="flex-1 p-6 overflow-y-auto">
+                    {messages.map((msg, index) => (
+                        <div
+                            key={index}
+                            className={`max-w-[70%] p-4 mb-4 rounded-lg ${
+                                msg.role === "USER"
+                                    ? "ml-auto bg-blue-600 text-white"
+                                    : "mr-auto bg-gray-700 text-gray-100"
+                            }`}
+                        >
+                            {msg.text}
+                        </div>
+                    ))}
+                    <div ref={messagesEndRef} />
                 </div>
-            </div>
+            ) : (
+                <div className="p-6 border-t border-gray-700 bg-gray-800">
+                    <div className="flex gap-4">
+                        <Textarea
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Type your message..."
+                            className="flex-1"
+                        />
+                        <Button onClick={sendMessage}>Send</Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
-export default ChatWindow;

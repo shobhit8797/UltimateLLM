@@ -11,7 +11,11 @@ const App = () => {
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <Router>
                 <Routes>
-                    <Route path="/" element={<ChatApp />} />
+                    <Route
+                        path="/chat/:conversation_id?"
+                        element={<ChatApp />}
+                    />
+
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     {/* <Route path="/about" element={<About />} /> */}

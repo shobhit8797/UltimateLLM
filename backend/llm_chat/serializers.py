@@ -4,9 +4,16 @@ from .models import Conversation, Message
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    conversation_id = serializers.UUIDField(
+        source="conversation.id", read_only=True
+    )  # Corrected from CharField
+    timestamp = serializers.DateTimeField(
+        source="created_at", format="%Y-%m-%dT%H:%M:%SZ", read_only=True
+    )
+
     class Meta:
         model = Message
-        fields = ["id", "text", "sender", "created_at"]
+        fields = ["id", "conversation_id", "text", "sender", "timestamp"]
 
 
 class ConversationListSerializer(serializers.ModelSerializer):

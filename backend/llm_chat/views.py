@@ -57,6 +57,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             conversation=conversation, text=user_message_text, sender=Sender.USER
         )
         user_message_data = MessageSerializer(user_message).data
+        print(":user_message_data:", user_message_data)
 
         def streaming_content():
             """
@@ -64,12 +65,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
             assistant chunks, and completion signal.
             """
             try:
-                yield json.dumps(
-                    {
-                        "conversation_id": str(conversation.id),
-                        "user_message": user_message_data,
-                    }
-                ) + "\n"
+                yield json.dumps(user_message_data) + "\n"
 
                 messages = [
                     (
@@ -80,23 +76,47 @@ class ConversationViewSet(viewsets.ModelViewSet):
                 ]
                 llm = GlobalResources().get_chat_llm()
 
+                ai_message = Message.objects.create(
+                    conversation=conversation,
+                    text="",
+                    sender=Sender.ASSISTANT,
+                )
+
                 full_response = ""
                 for chunk in llm.stream(messages):
                     full_response += chunk.content
-                    yield json.dumps({"text": chunk.text()}) + "\n"
+                    print("*"*50)
+                    print("chunk.text():", chunk.text())
+                    print("chunk.content:", chunk.content)
+                    print("response_metadata:", chunk.response_metadata)
+                    print("*"*50)
 
-                _ = Message.objects.create(
-                    conversation=conversation,
-                    text=full_response.strip(),
-                    sender=Sender.ASSISTANT,
-                )
+                    if (chunk.response_metadata.get("finish_reason") == 'stop'):
+                        break
+                    
+                    yield json.dumps(
+                        {
+                            "id": str(ai_message.id),
+                            "conversation": str(conversation.id),
+                            "text": chunk.text(),
+                            "sender": Sender.ASSISTANT,
+                            "created_at": ai_message.created_at.strftime(
+                                format="%Y-%m-%dT%H:%M:%SZ"
+                            ),
+                        }
+                    ) + "\n"
+
+                ai_message.text = full_response.strip()
+                ai_message.save()
+
                 yield json.dumps({"text": "DONE"}) + "\n"
 
             except Exception as e:
-                logger.error(f"Error in streaming_content: {str(e)}")
+                logger.error(
+                    f"Error in streaming_content: {str(e)}: {e.__traceback__.tb_lineno}"
+                )
                 yield json.dumps({"error": f"An error occurred: {str(e)}"}) + "\n"
 
-        # Return streaming response
         return StreamingHttpResponse(
             streaming_content(), content_type="text/event-stream"
         )
