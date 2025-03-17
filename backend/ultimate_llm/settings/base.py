@@ -113,8 +113,8 @@ OAUTH2_PROVIDER = {
         "write": "Write scope",
         "groups": "Access to your groups",
     },
-    "ACCESS_TOKEN_EXPIRE_SECONDS": 3600,  # Token expires in 1 hour
-    "REFRESH_TOKEN_EXPIRE_SECONDS": 1209600,  # Refresh token expires in 14 days
+    # "ACCESS_TOKEN_EXPIRE_SECONDS": 3600 * 24,  # Token expires in 1 Day
+    # "REFRESH_TOKEN_EXPIRE_SECONDS": 1209600,  # Refresh token expires in 14 days
 }
 
 
