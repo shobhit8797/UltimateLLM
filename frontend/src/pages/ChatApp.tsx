@@ -14,22 +14,7 @@ export default function ChatApp() {
     const [currentConversationId, setCurrentConversationId] = useState<
         string | undefined
     >(conversation_id);
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "0d4aef41-b217-4880-b820-0b208a4f6873",
-            conversation_id: "f97e9dbd-2a48-4031-b078-78fbbebdd885",
-            text: "HI",
-            sender: "U",
-            timestamp: "2025-03-15T22:36:59Z",
-        },
-        {
-            id: "0d4aef41-b217-4880-b820-0b208a4f6873",
-            conversation_id: "f97e9dbd-2a48-4031-b078-78fbbebdd885",
-            text: "Hello! How can I assist you today?",
-            sender: "A",
-            timestamp: "2025-03-15T22:36:59Z",
-        },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // Update the local state when the URL parameter changes
