@@ -1,6 +1,7 @@
 import ChatDisplay from "@/components/chatDisplay";
 import ChatInput from "@/components/chatInput";
 import { Message } from "@/types/chat";
+import { getAuthToken } from "@/utlis/auth";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -20,6 +21,9 @@ export default function ChatApp() {
     // Update the local state when the URL parameter changes
     useEffect(() => {
         setCurrentConversationId(conversation_id);
+        if (conversation_id) {
+            getConversation(conversation_id);
+        }
     }, [conversation_id]);
 
     // Scroll to bottom when messages change
@@ -29,6 +33,33 @@ export default function ChatApp() {
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const getConversation = async (conversation_id: string) => {
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/api/chat/conversations/${conversation_id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${getAuthToken()}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            // Set the retrieved messages to state
+            if (data.messages) {
+                setMessages(data.messages);
+            }
+        } catch (error) {
+            console.error("Error fetching conversation:", error);
+        }
     };
 
     const handleSubmit = async (message: string) => {
@@ -45,9 +76,7 @@ export default function ChatApp() {
                         }),
                     }),
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
+                        Authorization: `Bearer ${getAuthToken()}`,
                         "Content-Type": "application/json",
                     },
                 }
@@ -169,7 +198,7 @@ export default function ChatApp() {
             <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
                 <div className="flex flex-col w-full max-w-3xl mx-auto p-4">
                     <div className="flex-1 flex flex-col justify-center items-center text-center space-y-4">
-                        {currentConversationId ? (
+                        {messages.length > 0 ? (
                             <ChatDisplay messages={messages} />
                         ) : (
                             <>
