@@ -38,7 +38,7 @@ export default function ChatApp() {
     const getConversation = async (conversation_id: string) => {
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/chat/conversations/${conversation_id}`,
+                `${API_BASE_URL}/api/chat/conversations/${conversation_id}/`,
                 {
                     method: "GET",
                     headers: {
@@ -53,7 +53,6 @@ export default function ChatApp() {
             }
 
             const data = await response.json();
-            // Set the retrieved messages to state
             if (data.messages) {
                 setMessages(data.messages);
             }
