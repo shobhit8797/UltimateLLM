@@ -1,25 +1,79 @@
-import React from "react";
-import { Button } from "./ui/Button";
+// // src/components/Sidebar.jsx
+// import React from 'react';
+// import { Sidebar, SidebarSection, SidebarNav, SidebarNavItem } from "./ui/sidebar";
+// import { Home, Users, Settings } from "lucide-react";
+// import { Link } from 'react-router-dom';
 
-function Sidebar({ conversations, onSelectConversation, onNewConversation }) {
+// function AppSidebar() {
+//   return (
+//     <Sidebar className="hidden md:flex h-screen border-r">
+//       <SidebarSection>
+//         <SidebarNav>
+//           <SidebarNavItem asChild>
+//             <Link to="/" className="flex items-center gap-2">
+//               <Home className="h-4 w-4" />
+//               Home
+//             </Link>
+//           </SidebarNavItem>
+//           <SidebarNavItem asChild>
+//             <Link to="/users" className="flex items-center gap-2">
+//               <Users className="h-4 w-4" />
+//               Users
+//             </Link>
+//           </SidebarNavItem>
+//           <SidebarNavItem asChild>
+//             <Link to="/settings" className="flex items-center gap-2">
+//               <Settings className="h-4 w-4" />
+//               Settings
+//             </Link>
+//           </SidebarNavItem>
+//         </SidebarNav>
+//       </SidebarSection>
+//     </Sidebar>
+//   );
+// }
+
+// export default AppSidebar;
+// src/components/Sidebar.jsx
+import { Home, Settings, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+    Sidebar,
+    SidebarNav,
+    SidebarNavItem,
+    SidebarSection,
+} from "./ui/sidebar";
+
+function AppSidebar() {
     return (
-        <div className="w-64 bg-gray-800 p-4 border-r border-gray-700 overflow-y-auto">
-            <Button onClick={onNewConversation} className="w-full mb-4">
-                + New Chat
-            </Button>
-            <div className="space-y-2">
-                {conversations.map((conv) => (
-                    <div
-                        key={conv.id}
-                        onClick={() => onSelectConversation(conv.id)}
-                        className="p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors"
-                    >
-                        {conv.title || `Chat ${conv.id}`}
-                    </div>
-                ))}
-            </div>
-        </div>
+        <Sidebar className="hidden md:flex h-screen border-r">
+            <SidebarSection>
+                <SidebarNav>
+                    <SidebarNavItem asChild>
+                        <Link to="/" className="flex items-center gap-2">
+                            <Home className="h-4 w-4" />
+                            Home
+                        </Link>
+                    </SidebarNavItem>
+                    <SidebarNavItem asChild>
+                        <Link to="/users" className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            Users
+                        </Link>
+                    </SidebarNavItem>
+                    <SidebarNavItem asChild>
+                        <Link
+                            to="/settings"
+                            className="flex items-center gap-2"
+                        >
+                            <Settings className="h-4 w-4" />
+                            Settings
+                        </Link>
+                    </SidebarNavItem>
+                </SidebarNav>
+            </SidebarSection>
+        </Sidebar>
     );
 }
 
-export default Sidebar;
+export default AppSidebar;

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function ChatApp() {
+    console.log("::tooltip::");
     const API_BASE_URL = import.meta.env.VITE_BASE_URL;
     const { conversation_id } = useParams();
     const navigate = useNavigate();

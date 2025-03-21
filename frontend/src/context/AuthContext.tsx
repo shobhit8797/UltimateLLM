@@ -4,6 +4,7 @@ import {
     useEffect,
     useState,
     ReactNode,
+    useMemo,
 } from "react";
 import { getAuthToken, removeAuthToken, setAuthToken } from "../utlis/auth";
 
@@ -13,32 +14,42 @@ interface AuthContextType {
     logout: () => void;
 }
 
+// Create context with default undefined to enforce provider usage
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [token, setToken] = useState<string | null>(getAuthToken());
 
     useEffect(() => {
-        const token = getAuthToken();
-        setIsAuthenticated(!!token);
+        setToken(getAuthToken());
     }, []);
 
-    const login = (token: string) => {
-        setAuthToken(token);
-        setIsAuthenticated(true);
+    const isAuthenticated = !!token;
+
+    const login = (newToken: string) => {
+        setAuthToken(newToken);
+        setToken(newToken);
     };
 
     const logout = () => {
         removeAuthToken();
-        setIsAuthenticated(false);
+        setToken(null);
     };
+
+    // Memoize the context value to prevent unnecessary re-renders
+    const authValue = useMemo(
+        () => ({ isAuthenticated, login, logout }),
+        [isAuthenticated]
+    );
+
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={authValue}>
             {children}
         </AuthContext.Provider>
     );
 };
 
+// Custom hook for using authentication context
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
