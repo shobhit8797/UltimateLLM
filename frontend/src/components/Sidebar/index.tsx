@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import makeApiRequest from "@/utlis/request";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface Conversation {
     id: string;
@@ -55,10 +56,9 @@ export function AppSidebar() {
                             {conversationHistory.map((item) => (
                                 <SidebarMenuItem key={item.id}>
                                     <SidebarMenuButton asChild>
-                                        {/* <a href={item.url}> */}
-                                        {/* <item.icon /> */}
-                                        <span>{item.id}</span>
-                                        {/* </a> */}
+                                        <Link to={`chat/${item.id}`}>
+                                            <span>{item.id}</span>
+                                        </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             ))}

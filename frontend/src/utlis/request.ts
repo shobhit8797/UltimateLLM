@@ -5,7 +5,7 @@ import { getAuthToken } from "./auth";
 export interface ApiRequestConfig {
     endpoint: string;
     method: "GET" | "POST" | "PATCH";
-    payload?: Record<string, any>;
+    payload?: Record<string, any> | string;
     queryParams?: string[];
 }
 

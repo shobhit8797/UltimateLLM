@@ -5,6 +5,7 @@ import { getAuthToken } from "@/utlis/auth";
 import { BASE_URL } from "@/env";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import makeApiRequest from "@/utlis/request";
 
 export default function ChatApp() {
     const { conversation_id } = useParams();
@@ -22,11 +23,25 @@ export default function ChatApp() {
     useEffect(() => {
         setCurrentConversationId(conversation_id);
         if (conversation_id) {
-            getConversation(conversation_id);
+            const fetchConversation = async () => {
+                try {
+                    const response = await makeApiRequest({
+                        endpoint: `chat/conversations/${conversation_id}/`,
+                        method: "GET",
+                    });
+
+                    setMessages(response.messages ?? []);
+                } catch (error) {
+                    console.error(
+                        "Error fetching conversation history:",
+                        error
+                    );
+                }
+            };
+            fetchConversation();
         }
     }, [conversation_id]);
 
-    // Scroll to bottom when messages change
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
@@ -35,53 +50,24 @@ export default function ChatApp() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    const getConversation = async (conversation_id: string) => {
-        try {
-            const response = await fetch(
-                `${BASE_URL}/api/chat/conversations/${conversation_id}/`,
-                {
-                    method: "GET",
-                    headers: getAuthToken(),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.messages) {
-                setMessages(data.messages);
-            }
-        } catch (error) {
-            console.error("Error fetching conversation:", error);
-        }
-    };
-
     const handleSubmit = async (message: string) => {
         try {
             setIsLoading(true);
-            const response = await fetch(
-                `${BASE_URL}/api/chat/conversations/`,
-                {
-                    method: "POST",
-                    body: JSON.stringify({
-                        message,
-                        ...(currentConversationId && {
-                            conversation_id: currentConversationId,
-                        }),
+            const response = await makeApiRequest({
+                endpoint: `chat/conversations/`,
+                method: "POST",
+                payload: JSON.stringify({
+                    message,
+                    ...(currentConversationId && {
+                        conversation_id: currentConversationId,
                     }),
-                    headers: getAuthToken(),
-                }
-            );
+                }),
+            });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
             let assistantMessage = "";
 
-            if (response.body) {
-                const reader = response.body
+            if (response) {
+                const reader = response
                     .pipeThrough(new TextDecoderStream())
                     .getReader();
 

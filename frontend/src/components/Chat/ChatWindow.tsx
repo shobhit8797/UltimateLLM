@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
 import { getAuthToken } from "@/utlis/auth";
+import makeApiRequest from "@/utlis/request";
 
 const API_BASE_URL = "http://localhost:8000/";
 
@@ -14,7 +15,7 @@ export default function ChatWindow({
 }) {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
-    const messagesEndRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     log(conversationId);
 
@@ -28,13 +29,11 @@ export default function ChatWindow({
 
     const fetchMessages = async () => {
         try {
-            const response = await axios.get(
-                `${API_BASE_URL}api/chat/conversations/${conversationId}`,
-                {
-                    headers: getAuthToken(),
-                }
-            );
-            setMessages(response.data.messages);
+            const response = await makeApiRequest({
+                endpoint: `chat/conversations/${conversationId}/`,
+                method: "GET",
+            });
+            setMessages(response.messages ?? []);
         } catch (error) {
             console.error("Error fetching messages:", error);
         }
@@ -55,14 +54,11 @@ export default function ChatWindow({
         setInput("");
 
         try {
-            const response = await fetch(
-                `${API_BASE_URL}api/chat/conversations/${conversationId}/send_message`,
-                {
-                    method: "POST",
-                    headers: getAuthToken(),
-                    body: JSON.stringify({ text: messageText }),
-                }
-            );
+            const response = await makeApiRequest({
+                endpoint: `chat/conversations/${conversationId}/send_message`,
+                method: "POST",
+                payload: JSON.stringify({ text: messageText }),
+            });
 
             const reader = response.body?.getReader();
             const decoder = new TextDecoder();
