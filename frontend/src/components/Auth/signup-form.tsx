@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -9,6 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { BASE_URL } from "@/env";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -21,7 +22,6 @@ export function SignupForm({
     const [last_name, setLastName] = useState("");
     const [password, setPassword] = useState("");
 
-    const BASE_URL = import.meta.env.VITE_BASE_URL; // Fetch API URL from .env
     console.log("BASE_URL:", BASE_URL);
 
     const handleSubmit = async (event: React.FormEvent) => {

@@ -1,4 +1,5 @@
-import { ThemeProvider } from "@/components/theme-provider";
+import MainLayout from "@/components/layouts/MainLayout";
+import { ThemeProvider } from "@/components/Theme/theme-provider";
 import { Suspense, lazy } from "react";
 import {
     Navigate,
@@ -7,14 +8,12 @@ import {
     BrowserRouter as Router,
     Routes,
 } from "react-router-dom";
-import { SidebarProvider } from "./components/ui/sidebar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import ChatLayout from "./components/ChatLayout";
 
-const LoginPage = lazy(() => import("@/pages/LoginPage"));
-const SignupPage = lazy(() => import("@/pages/SignupPage"));
-const ChatApp = lazy(() => import("@/pages/ChatApp"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+const LoginPage = lazy(() => import("@/components/pages/LoginPage"));
+const SignupPage = lazy(() => import("@/components/pages/SignupPage"));
+const ChatApp = lazy(() => import("@/components/pages/ChatApp"));
+const NotFound = lazy(() => import("@/components/pages/NotFound"));
 
 // Loading Fallback Component
 const FallbackLoader = () => <div>Loading...</div>;
@@ -37,19 +36,13 @@ const App = () => (
 
                         {/* Protected Routes */}
                         <Route element={<ProtectedRoute />}>
-                            {/* <Route
-                                element={
-                                    <SidebarProvider>
-                                        <ChatLayout />
-                                    </SidebarProvider>
-                                }
-                            > */}
-                            <Route
-                                path="/chat/:conversation_id?"
-                                element={<ChatApp />}
-                            />
+                            <Route element={<MainLayout />}>
+                                <Route
+                                    path="/chat/:conversation_id?"
+                                    element={<ChatApp />}
+                                />
+                            </Route>
                         </Route>
-                        {/* </Route> */}
 
                         {/* 404 Page */}
                         <Route path="*" element={<NotFound />} />

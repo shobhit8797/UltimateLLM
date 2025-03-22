@@ -3,7 +3,9 @@ export const setAuthToken = (token: string) => {
 };
 
 export const getAuthToken = () => {
-    return localStorage.getItem("authToken") || null;
+    return {
+        Authorization: `Bearer ${localStorage.getItem("authToken") || null}`,
+    };
 };
 
 export const removeAuthToken = () => {

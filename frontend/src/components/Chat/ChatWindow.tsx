@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Button } from "./ui/Button";
-import { Textarea } from "./ui/Textarea";
 import { log } from "console";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "../ui/Button";
+import { Textarea } from "../ui/Textarea";
+import { getAuthToken } from "@/utlis/auth";
 
 const API_BASE_URL = "http://localhost:8000/";
 
@@ -30,11 +31,7 @@ export default function ChatWindow({
             const response = await axios.get(
                 `${API_BASE_URL}api/chat/conversations/${conversationId}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
+                    headers: getAuthToken(),
                 }
             );
             setMessages(response.data.messages);
@@ -62,21 +59,16 @@ export default function ChatWindow({
                 `${API_BASE_URL}api/chat/conversations/${conversationId}/send_message`,
                 {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "token"
-                        )}`,
-                    },
+                    headers: getAuthToken(),
                     body: JSON.stringify({ text: messageText }),
                 }
             );
 
-            const reader = response.body.getReader();
+            const reader = response.body?.getReader();
             const decoder = new TextDecoder();
             let assistantResponse = "";
 
-            while (true) {
+            while (reader) {
                 const { done, value } = await reader.read();
                 if (done) break;
 

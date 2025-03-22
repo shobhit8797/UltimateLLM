@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -9,9 +8,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import { BASE_URL, VITE_CLIENT_ID, VITE_CLIENT_SECRET } from "@/env";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
 
 export function LoginForm({
     className,
@@ -20,8 +21,6 @@ export function LoginForm({
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { login } = useAuth();
-
-    const BASE_URL = import.meta.env.VITE_BASE_URL;
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -36,8 +35,8 @@ export function LoginForm({
                     grant_type: "password",
                     username: email,
                     password: password,
-                    client_id: import.meta.env.VITE_CLIENT_ID,
-                    client_secret: import.meta.env.VITE_CLIENT_SECRET,
+                    client_id: VITE_CLIENT_ID,
+                    client_secret: VITE_CLIENT_SECRET,
                 }),
             });
 

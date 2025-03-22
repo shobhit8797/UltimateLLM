@@ -1,13 +1,12 @@
-import ChatDisplay from "@/components/chatDisplay";
-import ChatInput from "@/components/chatInput";
+import ChatDisplay from "@/components/Chat/chatDisplay";
+import ChatInput from "@/components/Chat/chatInput";
 import { Message } from "@/types/chat";
 import { getAuthToken } from "@/utlis/auth";
+import { BASE_URL } from "@/env";
 import { useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function ChatApp() {
-    console.log("::tooltip::");
-    const API_BASE_URL = import.meta.env.VITE_BASE_URL;
     const { conversation_id } = useParams();
     const navigate = useNavigate();
 
@@ -39,13 +38,10 @@ export default function ChatApp() {
     const getConversation = async (conversation_id: string) => {
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/chat/conversations/${conversation_id}/`,
+                `${BASE_URL}/api/chat/conversations/${conversation_id}/`,
                 {
                     method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${getAuthToken()}`,
-                        "Content-Type": "application/json",
-                    },
+                    headers: getAuthToken(),
                 }
             );
 
@@ -66,7 +62,7 @@ export default function ChatApp() {
         try {
             setIsLoading(true);
             const response = await fetch(
-                `${API_BASE_URL}/api/chat/conversations/`,
+                `${BASE_URL}/api/chat/conversations/`,
                 {
                     method: "POST",
                     body: JSON.stringify({
@@ -75,10 +71,7 @@ export default function ChatApp() {
                             conversation_id: currentConversationId,
                         }),
                     }),
-                    headers: {
-                        Authorization: `Bearer ${getAuthToken()}`,
-                        "Content-Type": "application/json",
-                    },
+                    headers: getAuthToken(),
                 }
             );
 
